@@ -5,6 +5,7 @@ from basic_CLI.load_CLI import load_CLI
 # from basic_CLI.observer import nfa2dfa_CLI
 from basic_CLI.savefsa import save_CLI
 from basic_CLI.fsabuilder import build_CLI
+
 from basic_CLI.cc_CLI import cc_CLI
 from basic_CLI.trim_CLI import trim_CLI
 from basic_CLI.fm_CLI import fm_CLI
@@ -12,6 +13,8 @@ from basic_CLI.diag_CLI import diag_CLI
 from basic_CLI.nfa2dfa_CLI import nfa2dfa_CLI
 from basic_CLI.hhat_CLI import hhat_CLI
 from basic_CLI.compute_supervisor_CLI import compute_supervisor_CLI
+
+from basic_CLI.analysis import reachability, coreachability, blocking, trim, dead, reverse
 
 class command():
     def __init__(self, help, help_more, category, f):
@@ -24,7 +27,7 @@ def help(args,**kwargs):
     if len(args)>0 and args[0] in cmdict:
         print(cmdict[args[0]].help)
     else:
-        commandstypes=['basic', 'functions']
+        commandstypes=['basic', 'functions', 'analysis']
         for ct in commandstypes:
             print(colored("-------------------------- "+ct+"  --------------------------\n", "green"))
             for key, value in cmdict.items():
@@ -159,10 +162,52 @@ cmdict={
     'supervisor' : command(
         help=colored("supervisor:", "yellow", attrs=["bold"]) + "This functions computes the supervisor of an automaton G, given the specification automaton H",
         help_more=colored("Usage:", attrs=["bold"]) + "\n\tsupervisor outputname automaton_name specif_automaton_name"+
-        colored("\nOptional arguments:", attrs=["bold"]) + "\n\t-v verbose output, this will print the steps of the algorithm"+
-        colored("\nExample:" + "\n\tsupervisor G0 H"),
+                    colored("\nOptional arguments:", attrs=["bold"]) + "\n\t-v verbose output, this will print the steps of the algorithm"+
+                    colored("\nExample:" + "\n\tsupervisor G0 H"),
         category='functions',
         f=compute_supervisor_CLI
+    ),
+    'reach' : command(
+        help='This functions computes the reachability of a fsa',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\treach fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + "\n\treach G0",
+        category='analysis',
+        f=reachability
+    ),
+    'coreach' : command(
+        help='This functions computes the co-reachability of a fsa',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\tcoreach fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + "\n\tcoreach G0",
+        category='analysis',
+        f=coreachability
+    ),
+    'blocking' : command(
+        help='This functions computes if the fsa is blocking',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\tblocking fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + "\n\tblocking G0",
+        category='analysis',
+        f=blocking
+    ),
+    'trim' : command(
+        help='This functions computes if the fsa is trim',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\ttrim fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + "\n\ttrim G0",
+        category='analysis',
+        f=trim
+    ),
+    'dead' : command(
+        help='This functions computes if a fsa has dead states',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\tdead fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + "\n\tdead G0",
+        category='analysis',
+        f=dead
+    ),
+    'reverse' : command(
+        help='This functions computes if the fsa is reversible',
+        help_more=colored("Usage:", attrs=["bold"]) + "\n\treverse fsa_name\n"+
+                    colored("Example:", attrs=["bold"]) + " \n\treverse G0",
+        category='analysis',
+        f=reverse
     ),
     'cmd2' : command(
         help='This function does nothing, but better (si rompe)',

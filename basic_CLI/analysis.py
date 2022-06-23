@@ -8,15 +8,7 @@ import colorama
 colorama.init()
 
 
-def reachability(args, fsalst):
-    if '-h' in args:
-        print(colored("\nreach: ", "yellow", attrs=["bold"]) + "This functions computes the reachability of a fsa\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\treach fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + "\n\treach G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
+def reachability(args, opts, fsalst, **kwargs):
 
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"reach -h\" to help", "yellow"))
@@ -44,16 +36,7 @@ def reachability(args, fsalst):
         print(e)
 
 
-def coreachability(args, fsalst):
-    if '-h' in args:
-        print(
-            colored("\ncoreach: ", "yellow", attrs=["bold"]) + "This functions computes the co-reachability of a fsa\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\tcoreach fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + "\n\tcoreach G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
+def coreachability(args, opts, fsalst, **kwargs):
 
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"coreach -h\" to help", "yellow"))
@@ -81,15 +64,7 @@ def coreachability(args, fsalst):
         print(e)
 
 
-def blocking(args, fsalst):
-    if '-h' in args:
-        print(colored("\nblocking: ", "yellow", attrs=["bold"]) + "This functions computes if the fsa is blocking\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\tblocking fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + "\n\tblocking G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
+def blocking(args, opts, fsalst, **kwargs):
 
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"blocking -h\" to help", "yellow"))
@@ -115,15 +90,7 @@ def blocking(args, fsalst):
         print(e)
 
 
-def trim(args, fsalst):
-    if '-h' in args:
-        print(colored("\ntrim: ", "yellow", attrs=["bold"]) + "This functions computes if the fsa is trim\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\ttrim fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + "\n\ttrim G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
+def trim(args, opts, fsalst, **kwargs):
 
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"trim -h\" to help", "yellow"))
@@ -147,16 +114,8 @@ def trim(args, fsalst):
         print(e)
 
 
-def dead(args, fsalst):
-    if '-h' in args:
-        print(colored("\ndead: ", "yellow", attrs=["bold"]) + "This functions computes if a fsa has dead states\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\tdead fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + "\n\tdead G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
-
+def dead(args, opts, fsalst, **kwargs):
+    
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"dead -h\" to help", "yellow"))
         return
@@ -181,15 +140,7 @@ def dead(args, fsalst):
         print(e)
 
 
-def reverse(args, fsalst):
-    if '-h' in args:
-        print(colored("\nreverse: ", "yellow", attrs=["bold"]) + "This functions computes if the fsa is reversible\n")
-        print(colored("Usage:", attrs=["bold"]) + "\n\treverse fsa_name\n")
-        print(colored("Example:", attrs=["bold"]) + " \n\treverse G0")
-        print("")
-        # print("Optional arguments:")
-        # print("-v verbose output, this will print the steps of the algorithm")
-        return
+def reverse(args, opts, fsalst, **kwargs):
 
     if len(args) < 1:
         print(colored("Not enough arguments provided, type \"reverse -h\" to help", "yellow"))
