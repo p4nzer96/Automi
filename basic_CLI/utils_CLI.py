@@ -11,7 +11,7 @@ def chdir(path, args,**kwargs):
     # Path is absolute
     if os.path.isabs(os.path.normpath(args[0])):
         if os.path.isdir(os.path.normpath(args[0])):
-            path = os.path.normpath(args[0])
+            path.data = os.path.normpath(args[0])
         else:
             print(colored("Invalid path", "red"))
 
@@ -56,9 +56,9 @@ def chdir(path, args,**kwargs):
 def showdir(path, **kwargs):
     print(path)
 
-def ldir(**kwargs):
-    print(colored("\nElements in: ", "yellow", attrs=["bold"]) + path + "\\\n")
-    l = os.listdir(path + "\\")  # files only
+def ldir(path, **kwargs):
+    print(colored("\nElements in: ", "yellow", attrs=["bold"]) + path.data + "\\\n")
+    l = os.listdir(path.data + "\\")  # files only
     for el in l:
         print(el)
 
