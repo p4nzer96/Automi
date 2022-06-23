@@ -20,8 +20,35 @@ path = Container(home + '/Documents/FsaToolbox')
 
 fsalst = dict()
 
+# splashscreen
+forg_color = 'green'
+back_color = 'cyan'
+back1_color = 'on_grey'
+splash = [" ███████╗███████╗ █████╗ ████████╗ ██████╗  ██████╗ ██╗     ██████╗  ██████╗ ██╗  ██╗",
+          " ██╔════╝██╔════╝██╔══██╗╚══██╔══╝██╔═══██╗██╔═══██╗██║     ██╔══██╗██╔═══██╗╚██╗██╔╝",
+          " █████╗  ███████╗███████║   ██║   ██║   ██║██║   ██║██║     ██████╔╝██║   ██║ ╚███╔╝ ",
+          " ██╔══╝  ╚════██║██╔══██║   ██║   ██║   ██║██║   ██║██║     ██╔══██╗██║   ██║ ██╔██╗ ",
+          " ██║     ███████║██║  ██║   ██║   ╚██████╔╝╚██████╔╝███████╗██████╔╝╚██████╔╝██╔╝ ██╗",
+          " ╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝"]
+for row in splash:
+    for char in row:
+        if char == '█':
+            print(colored(char, forg_color), end='')
+        else:
+            print(colored(char, back_color, back1_color), end='')
+    print("")
+print("\nNote: this is still in development")
+print("Type \"help\" to see the list of commands")
+print("\n\nNote: the default path is:")
+print(path)
+print("")
+
+
 while True:
-    inp = shlex.split(input(">>"), posix=False)
+    try:
+        inp = shlex.split(input(">>"), posix=False)
+    except KeyboardInterrupt:
+        exit()
 
     #check if the input is the function format -> todo fun?
     if  "(" in inp[0] and ")" in inp[0]: #TODO regex
