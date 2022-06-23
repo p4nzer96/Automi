@@ -3,7 +3,7 @@ from fsatoolbox.state import state
 from fsatoolbox.utils.misc import v_print
 
 
-def cc(G0, G1, verbose=False, name_style=0):
+def cc(G0, G1, verbose=False, name_style=1):
     """
     Function used to compute the concurrent composition between two FSAs
 

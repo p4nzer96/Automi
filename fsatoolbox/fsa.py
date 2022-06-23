@@ -1,9 +1,10 @@
 import json
-import numpy as np
 import pandas as pd
-from tabulate import tabulate
 from fsatoolbox import event, state
 from fsatoolbox.utils import load_module
+from fsatoolbox.utils.filter_delta import filter_delta
+from fsatoolbox.utils.show_module import show_full, show_comp
+from fsatoolbox.utils.write_module import save_txt, save_json
 
 
 class StateNotFoundExc(Exception):
@@ -131,7 +132,7 @@ class fsa:
 
         # Reading states and properties
 
-        state_properties = {"isInitial": None, "isFinal": None, "isForbidden": None}
+        state_properties = {"isInitial": None, "isFinal": None}
 
         for state_name in jsonObject['X']:
             for prop in state_properties.keys():
@@ -142,8 +143,7 @@ class fsa:
             # Creating the state
             State = state(state_name,
                           state_properties["isInitial"],
-                          state_properties["isFinal"],
-                          state_properties["isForbidden"])
+                          state_properties["isFinal"])
 
             if state_properties["isInitial"]:  # If the state is initial, add it to initial states
                 x0.append(State)
@@ -219,53 +219,15 @@ class fsa:
 
     def to_file(self, filename):
 
-        # Base dict structure
-        fsa_dict = dict.fromkeys(["X", "E", "delta"])
+        if filename[-4:].lower() == ".txt":
+            save_txt(filename, self.X, self.E, self.delta)
+        elif filename[-5:].lower() == ".json":
+            save_json(filename, self.X, self.E, self.delta)
+        else:
+            print("Unspecified file type: default saving to json")
+            save_json(filename, self.X, self.E, self.delta)
 
-        # Populating the states
-        fsa_dict["X"] = dict.fromkeys([x.label for x in self.X])
-
-        for x in self.X:
-
-            state_properties = vars(x)
-            dict_x = {}
-
-            for prop in state_properties.keys():
-
-                if state_properties[prop] is not None:
-                    dict_x[str(prop)] = state_properties[prop]
-
-            fsa_dict["X"][x.label] = dict_x
-
-        fsa_dict["E"] = dict.fromkeys([e.label for e in self.E])
-
-        # Events
-        for e in self.E:
-
-            event_properties = vars(e)
-            dict_e = {}
-
-            for prop in event_properties.keys():
-
-                if event_properties[prop] is not None:
-                    dict_e[str(prop)] = event_properties[prop]
-
-            fsa_dict["E"][e.label] = dict_e
-
-        # Delta
-        fsa_dict["delta"] = dict.fromkeys(list(self.delta.index))
-
-        for index, row in self.delta.iterrows():
-            fsa_dict["delta"][index] = dict.fromkeys(["start", "event", "end"])
-
-            fsa_dict["delta"][index]["start"] = row[0].label
-            fsa_dict["delta"][index]["event"] = row[1].label
-            fsa_dict["delta"][index]["end"] = row[2].label
-
-        with open(filename, "w") as outfile:
-            json.dump(fsa_dict, outfile, indent=4)
-
-    def showfsa(self):
+    def showfsa(self, style=1):
 
         """
         Shows a graphical representation of the FSA
@@ -275,102 +237,12 @@ class fsa:
 
         """
 
-        column_labels = ["X"] + [x.label for x in self.E]
-
-        data = np.empty((len(self.X), len(self.E) + 1), dtype='U100')
-        data[:, 0] = [x.label for x in self.X]
-
-        event_table = np.empty((1, len(self.E)), dtype='U100')
-        state_table = np.empty((1, len(self.X)), dtype='U100')
-
-        for i, state in enumerate(self.X):
-            for j, event in enumerate(self.E):
-
-                filtered_events = self.filter_delta(state, event)['end'].values
-                end_labels = [x.label for x in filtered_events]
-                string = ""
-
-                if not end_labels:
-                    data[i, j + 1] = "-"
-                    continue
-
-                for end in end_labels:
-
-                    if not string:
-
-                        string += end
-
-                    else:
-
-                        string += ", " + end
-
-                data[i, j + 1] = string
-
-        # Populating the column representing the properties of the states
-
-        # TODO: Find a better solution
-
-        for i, state in enumerate(self.X):
-
-            props = ["isInitial", "isFinal", "isForbidden"]
-            props_label = ["I", "F", "FR"]
-            true_props_label = []
-
-            state_attr = vars(state)
-
-            for idx, prop in enumerate(props):
-                if state_attr[prop]:
-                    true_props_label.append(props_label[idx])
-
-            if len(true_props_label) != 0:
-                state_table[:, i] = ", ".join(true_props_label)
-
-            else:
-                state_table[:, i] = "-"
-
-        # Populating the table representing the properties of the events
-
-        for i, event in enumerate(self.E):
-
-            string = ""
-
-            if event.isObservable:
-                string += "0"
-
-            if event.isControllable:
-
-                if string:
-                    string += ", "
-
-                string += "C"
-
-            if event.isFault:
-
-                if string:
-                    string += ", "
-
-                string += "F"
-
-            if not string:
-
-                event_table[:, i] = "-"
-
-            else:
-
-                event_table[:, i] = string
-
-        table = tabulate(data, headers=column_labels, stralign="center", tablefmt='grid')
-        event_properties = tabulate(event_table, headers=self.E, stralign="center", tablefmt='grid')
-        state_properties = tabulate(state_table, headers=self.X, stralign="center", tablefmt='grid')
-
-        text = "\nTable:\n" + \
-               table + \
-               "\n\nEvent Properties:\n" + \
-               event_properties + \
-               "\nLegend: O: Observable, C: Controllable, F: Fault\n\n" + \
-               "State Properties:\n" + \
-               state_properties + \
-               "\nLegend: I: Initial, F: Final, FR: Forbidden\n "
+        if style == 0:
+            text = show_full(self._X, self._E, self._delta)
+        elif style == 1:
+            text = show_comp(self._X, self._E, self._delta)
+        else:
+            raise ValueError
 
         return text
 
@@ -387,25 +259,7 @@ class fsa:
             DataFrame: Filtered delta according to filter passed as argument of the function
         """
 
-        filt_delta = self.delta
-
-        if start:  # Starting state
-            start = start.label if isinstance(start, state) else start  # If start is a State object, parse it
-            condition = filt_delta["start"].apply(lambda x: x.label) == start
-            filt_delta = filt_delta.loc[condition]
-
-        if transition:  # Transition event
-            transition = transition.label if isinstance(transition, event) else transition  # If transition is an Event
-            # object, parse it
-            condition = filt_delta["transition"].apply(lambda x: x.label) == transition
-            filt_delta = filt_delta.loc[condition]
-
-        if end:  # Ending state
-            end = end.label if isinstance(end, state) else end  # If event is a state object, parse it
-            condition = filt_delta["end"].apply(lambda x: x.label) == end
-            filt_delta = filt_delta.loc[condition]
-
-        return filt_delta
+        return filter_delta(self.delta, start, transition, end)
 
     def add_state(self, new_state, isInitial=None, isFinal=None, isForbidden=None):
 
@@ -460,29 +314,29 @@ class fsa:
 
             raise ValueError
 
-    def remove_state(self, state):
+    def remove_state(self, fsa_state):
         """
-        Removes an state or a list of states from the FSA
+        Removes a state or a list of states from the FSA
         Args:
-            state (state): state/s to remove
+            fsa_state (state): state/s to remove
         """
 
-        state = self._state_parser(state)
+        fsa_state = self._state_parser(fsa_state)
 
-        if state is None or state not in self.X:
+        if fsa_state is None or fsa_state not in self.X:
             raise StateNotFoundExc("Error: state not in X")
 
         for x in self._X:
-            if x == state:
+            if x == fsa_state:
                 self._X.remove(x)
 
         if not self._delta.empty:
-            self._delta.drop(self.delta[((self._delta.start == state) |
-                                         (self._delta.end == state))].index, inplace=True)
+            self._delta.drop(self.delta[((self._delta.start == fsa_state) |
+                                         (self._delta.end == fsa_state))].index, inplace=True)
 
         self._update_fsa()
 
-    def change_state_props(self, state, **kwargs):
+    def change_state_props(self, fsa_state, **kwargs):
         """
         Changes the properties of a state
 
@@ -491,13 +345,13 @@ class fsa:
             **kwargs (): properties
         """
 
-        state = self._state_parser(state)
+        fsa_state = self._state_parser(fsa_state)
 
-        if state not in self._X:
+        if fsa_state not in self._X:
             raise StateNotFoundExc(Exception)
 
         for prop in kwargs.keys():
-            setattr(state, prop, kwargs[prop])
+            setattr(fsa_state, prop, kwargs[prop])
 
         self._update_fsa()
 
@@ -538,43 +392,43 @@ class fsa:
 
             raise ValueError
 
-    def remove_event(self, event):
+    def remove_event(self, fsa_event):
         """
         Removes an event or a list of events from the FSA
         Args:
-            event (event): event/S to remove
+            fsa_event (event): event/S to remove
         """
 
-        event = self._event_parser(event)
+        fsa_event = self._event_parser(fsa_event)
 
-        if event is None or event not in self.E:
+        if fsa_event is None or fsa_event not in self.E:
             raise EventNotFoundExc("Error: event not in alphabet")
 
         for e in self._E:
-            if e == event:
+            if e == fsa_event:
                 self._E.remove(e)
 
         if not self._delta.empty:
-            self._delta.drop(self.delta[(self._delta.transition == event)], inplace=True)
+            self._delta.drop(self.delta[(self._delta.transition == fsa_event)], inplace=True)
 
         self._update_fsa()
 
-    def change_event_props(self, event, **kwargs):
+    def change_event_props(self, fsa_event, **kwargs):
         """
         Changes the properties of an event
 
         Args:
-            event (event): event of which you want to change the properties
+            fsa_event (event): event of which you want to change the properties
             **kwargs (): properties
         """
 
-        event = self._event_parser(event)
+        fsa_event = self._event_parser(fsa_event)
 
-        if event not in self._E:
+        if fsa_event not in self._E:
             raise EventNotFoundExc(Exception)
 
         for prop in kwargs.keys():
-            setattr(event, prop, kwargs[prop])
+            setattr(fsa_event, prop, kwargs[prop])
 
         self._update_fsa()
 
@@ -640,7 +494,7 @@ class fsa:
 
         self._update_fsa()
 
-    def remove_transition(self, start, event, end):
+    def remove_transition(self, start, fsa_event, end):
         """
         Removes a transition to the delta relation/function
 
@@ -651,11 +505,11 @@ class fsa:
         """
 
         start = self._state_parser(start)
-        event = self._event_parser(event)
+        fsa_event = self._event_parser(fsa_event)
         end = self._state_parser(end)
 
         transition = self.delta[((self._delta.start == start) &
-                                 (self._delta.transition == event) &
+                                 (self._delta.transition == fsa_event) &
                                  (self._delta.end == end))]
 
         if transition.empty:
@@ -667,7 +521,7 @@ class fsa:
 
     # Internal Methods -------------------------------------------------------------
 
-    def _state_parser(self, states):
+    def _state_parser(self, states: object):
         """
         Parse a state from string to the corresponding object
         Args:
@@ -696,7 +550,7 @@ class fsa:
         else:
             raise TypeError
 
-    def _event_parser(self, events):
+    def _event_parser(self, events: object):
         """
         Parse a state from string to the corresponding object
         Args:

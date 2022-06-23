@@ -1,6 +1,4 @@
-import fsatoolbox
-from fsatoolbox import *
-from fsatoolbox.utils.analysis import get_blockingness_info, get_deadness_info, get_reachability_info, \
+from fsatoolbox.analysis import get_blockingness_info, get_deadness_info, get_reachability_info, \
     get_reversibility_info, get_trim_info, get_co_reachability_info
 from termcolor import colored
 import colorama

@@ -22,8 +22,6 @@ def save_CLI(args_d):
             filename = os.path.join(path, args[1])
         else:
             filename = args[1]
-        if args[1][-4:] != ".fsa":
-            filename = filename + ".fsa"
 
         try:
             fsalst[args[0]].to_file(filename)  # current path

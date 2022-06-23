@@ -6,7 +6,6 @@ class state:
     label: str = None
     isInitial: bool = None
     isFinal: bool = None
-    isForbidden: bool = None
 
     # Internal properties 
 
@@ -15,6 +14,9 @@ class state:
     is_Blocking: bool = None
     is_Dead: bool = None
     is_co_Reachable_to_x0: bool = None
+
+    # Used for supervisory problems
+    isForbidden: bool = None
 
     def __hash__(self):  # TODO: Improvement needed
         return hash(self.label)

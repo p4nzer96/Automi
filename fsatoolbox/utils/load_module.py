@@ -24,60 +24,62 @@ def load_json(filename):
 
 
 def load_txt(filename):
-    def parse_states(line, fsa_dict):
+    def parse_states(txt_line, fsa_dictionary):
 
-        state_attrs = line.split()
+        state_attrs = txt_line.split()
 
         # Parsing state attributes
 
-        fsa_dict['X'][state_attrs[0]] = {'isInitial': bool(eval(state_attrs[1])),
-                                         'isFinal': bool(eval(state_attrs[2])),
-                                         'isForbidden': bool(eval(state_attrs[3]))}
+        fsa_dictionary['X'][state_attrs[0]] = {'isInitial': bool(eval(state_attrs[1])),
+                                               'isFinal': bool(eval(state_attrs[2]))}
 
-    def parse_transitions(current_state, line, fsa_dict):
-        ev_trans = line.split()
+    def parse_transitions(curr_state, txt_line, fsa_dictionary):
+        ev_trans = txt_line.split()
 
         # Parsing events and transitions
 
-        if ev_trans[0] not in fsa_dict['E']:
-            fsa_dict['E'][ev_trans[0]] = {}  # Add event to alphabet
+        if ev_trans[0] not in fsa_dictionary['E']:
+            fsa_dictionary['E'][ev_trans[0]] = {}  # Add event to alphabet
 
             # Is the event controllable?
 
             if ev_trans[2] == "c":
-                fsa_dict['E'][ev_trans[0]]['isControllable'] = True
+                fsa_dictionary['E'][ev_trans[0]]['isControllable'] = True
             elif ev_trans[2] == "uc":
-                fsa_dict['E'][ev_trans[0]]['isControllable'] = False
+                fsa_dictionary['E'][ev_trans[0]]['isControllable'] = False
             else:
                 raise ValueError
 
             # Is the event observable?
 
             if ev_trans[3] == "o":
-                fsa_dict['E'][ev_trans[0]]['isObservable'] = True
+                fsa_dictionary['E'][ev_trans[0]]['isObservable'] = True
             elif ev_trans[3] == "uo":
-                fsa_dict['E'][ev_trans[0]]['isObservable'] = False
+                fsa_dictionary['E'][ev_trans[0]]['isObservable'] = False
             else:
                 raise ValueError
 
             # Is the event faulty?
 
             if ev_trans[4] == "f":
-                fsa_dict['E'][ev_trans[0]]['isFaulty'] = True
+                fsa_dictionary['E'][ev_trans[0]]['isFaulty'] = True
             elif ev_trans[4] == "uf":
-                fsa_dict['E'][ev_trans[0]]['isFaulty'] = False
+                fsa_dictionary['E'][ev_trans[0]]['isFaulty'] = False
             else:
                 raise ValueError
 
         # Add state to the dict
 
-        fsa_dict['delta'][len(fsa_dict['delta'])] = {"start": current_state, "event": ev_trans[0], "end": ev_trans[1]}
+        fsa_dictionary['delta'][len(fsa_dictionary['delta'])] = {"start": curr_state, "event": ev_trans[0],
+                                                                 "end": ev_trans[1]}
 
     # Open .txt file
 
     fd = open(filename, "r")
 
     fsa_dict = {"X": {}, "E": {}, "delta": {}}
+
+    n_states = None
 
     first_line = True  # I'm reading the first line of the file?
     parse_state = True  # I'm a parsing a state (if false I'm parsing an event)
@@ -92,7 +94,7 @@ def load_txt(filename):
         # Parsing the first line (get the number of states)
 
         if first_line:
-            assert line.strip().isdigit() == True
+            assert line.strip().isdigit() is True
             n_states = int(line.strip())
             first_line = False
             continue
@@ -107,7 +109,6 @@ def load_txt(filename):
             parse_transitions(current_state, line, fsa_dict)
 
     assert n_states == len(fsa_dict['X'])
-    # json_object = json.dumps(fsa_dict, indent=4)
 
     fd.close()
 

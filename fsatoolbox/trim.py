@@ -1,7 +1,6 @@
 import copy
 
-from fsatoolbox import fsa
-from fsatoolbox.utils import analysis
+from fsatoolbox import fsa, analysis
 
 
 def trim(fsa_obj: fsa):
